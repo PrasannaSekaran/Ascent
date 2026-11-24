@@ -1,0 +1,8 @@
+{
+  "name": "ascent-cloud-devops",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Milestone-based Cloud & DevOps learning path for two learners, with sync, notes and rewards.",
+  "engines": { "node": ">=18" }
+}
