@@ -25,8 +25,8 @@ When you run it locally, progress is saved in your browser ("Local only").
 2. **Turn on sync between you two:** in the Vercel project, open **Storage → Create / Marketplace → Upstash (Redis)**. Create the free database and **connect it to this project**. This adds `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically.
 3. **Redeploy** so the function picks up the env vars.
 4. Each of you opens the site on your own device:
-   - Friend 1 picks **Learner 1**, enters a name and copies the generated **squad code**.
-   - Friend 2 picks **Learner 2** and pastes the **same squad code**.
+   - Prasanna picks **Learner 1** and copies the generated **squad code**.
+   - Sowndarya picks **Learner 2** and pastes the **same squad code**.
    - The pill in the top bar should say **Synced**.
 
 The squad code works like a shared password. Anyone who has it can read your squad's progress and notes, so keep it private.

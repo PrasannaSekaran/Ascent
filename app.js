@@ -10,6 +10,7 @@
   const XP = { topic: 10, quiz: 15, module: 100, scenario: 50 };
   const SLOT_COLORS = { a: "#4F46E5", b: "#0D9488" };
   const STORE = "ascent.v1";
+  const NAMES = { a: "Prasanna", b: "Sowndarya" };
   const API = "/api/squad";
   const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -51,12 +52,14 @@
     try {
       const s = JSON.parse(localStorage.getItem(STORE));
       if (s && s.learners) {
-        s.learners.a = normalize(s.learners.a, "Learner 1");
-        s.learners.b = normalize(s.learners.b, "Learner 2");
+        for (const id of ["a", "b"]) {
+          s.learners[id] = normalize(s.learners[id], NAMES[id]);
+          if (/^Learner( \d)?$/.test(s.learners[id].name)) s.learners[id].name = NAMES[id];
+        }
         return s;
       }
     } catch (e) { /* ignore */ }
-    return { setup: false, me: "a", squad: "", learners: { a: blank("Learner 1"), b: blank("Learner 2") } };
+    return { setup: false, me: "a", squad: "", learners: { a: blank(NAMES.a), b: blank(NAMES.b) } };
   }
   let S = load();
   const ui = { noteTab: "me", revealed: {}, notesFilter: "", pendingRender: false, notePreview: false };
@@ -300,14 +303,14 @@
           <div class="field">
             <label>Which slot are you?</label>
             <div class="seg">
-              <label><input type="radio" name="slot" value="a" ${S.me === "a" ? "checked" : ""}/><span><i style="background:${SLOT_COLORS.a}"></i>Learner 1</span></label>
-              <label><input type="radio" name="slot" value="b" ${S.me === "b" ? "checked" : ""}/><span><i style="background:${SLOT_COLORS.b}"></i>Learner 2</span></label>
+              <label><input type="radio" name="slot" value="a" ${S.me === "a" ? "checked" : ""}/><span><i style="background:${SLOT_COLORS.a}"></i>Learner 1 · ${esc(NAMES.a)}</span></label>
+              <label><input type="radio" name="slot" value="b" ${S.me === "b" ? "checked" : ""}/><span><i style="background:${SLOT_COLORS.b}"></i>Learner 2 · ${esc(NAMES.b)}</span></label>
             </div>
             <small>Your buddy picks the other slot on their device.</small>
           </div>
           <div class="grid2">
-            <div class="field"><label for="f-me">Your name</label><input id="f-me" name="me" maxlength="24" required value="${esc(first ? "" : me().name)}" placeholder="e.g. Rohit"/></div>
-            <div class="field"><label for="f-bud">Buddy's name</label><input id="f-bud" name="bud" maxlength="24" value="${esc(first ? "" : bud().name)}" placeholder="Syncs from their device"/></div>
+            <div class="field"><label for="f-me">Your name</label><input id="f-me" name="me" maxlength="24" required value="${esc(me().name)}" placeholder="Your name"/></div>
+            <div class="field"><label for="f-bud">Buddy's name</label><input id="f-bud" name="bud" maxlength="24" value="${esc(bud().name)}" placeholder="Buddy's name"/></div>
           </div>
           <div class="field">
             <label for="f-code">Squad code</label>
@@ -961,6 +964,12 @@
   });
 
   document.addEventListener("change", (e) => {
+    if (e.target.name === "slot") {
+      const s = e.target.value, o = s === "a" ? "b" : "a";
+      const fm = document.getElementById("f-me"), fb = document.getElementById("f-bud");
+      if (fm && fb) { fm.value = S.learners[s].name || NAMES[s]; fb.value = S.learners[o].name || NAMES[o]; }
+      return;
+    }
     if (e.target.id !== "importFile") return;
     const f = e.target.files[0]; if (!f) return;
     f.text().then((txt) => {
@@ -990,7 +999,7 @@
     if (slotChanged && !S.setup) { /* first run: nothing to move */ }
     me().name = myName; me().updated = Date.now();
     const other = bud();
-    if (budName && (!other.updated || other.name.startsWith("Learner"))) other.name = budName;
+    if (budName && (!other.updated || other.name === NAMES[budId()] || other.name.startsWith("Learner"))) other.name = budName;
     S.squad = code; S.setup = true;
     save(); closeModal(); render();
     if (code) { pull().then(() => schedulePush(50)); } else setSync("local");
